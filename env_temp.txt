@@ -1,0 +1,16 @@
+﻿# NextAuth
+NEXTAUTH_SECRET=your-secret-key-here-change-in-production
+NEXTAUTH_URL=http://localhost:3000
+
+# VAPID Keys
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=BPBeu6GIIfeTbo3SsLghB2Q-wrIo7NvIjAXYhi3LwcFVl7K0J6EvRSMWvtNRR0nvaysx-MVahSqP-tG46MwPKUM
+VAPID_PRIVATE_KEY=A9Rd8o6nY-ItzmCbtW8sSqd-EaFJbtjbievr_6GPF8M
+VAPID_SUBJECT=mailto:leadsbydharan@gmail.com
+
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Razorpay
+RAZORPAY_KEY_ID=rzp_test_Rp1t7wudsAU1vq
+RAZORPAY_KEY_SECRET=Ur3FswZDRWelZc3de1gLV6J6
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_Rp1t7wudsAU1vq
