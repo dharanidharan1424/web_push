@@ -31,12 +31,7 @@ export default function TestPage() {
 
     return (
         <>
-            <Script
-                src="https://web-push-eight-hazel.vercel.app/push-client.js"
-                data-website-id="cmiy5s27k0001je6smki3adq7"
-                data-api-url="https://web-push-eight-hazel.vercel.app"
-                strategy="afterInteractive"
-            />
+            <script src="https://web-push-eight-hazel.vercel.app/push-client.js" data-website-id="cmiyhd90f000beup7rf8vlg42" data-api-url="https://web-push-eight-hazel.vercel.app"></script>
 
             <div style={{ padding: '40px', fontFamily: 'Arial' }}>
                 <h1>Web Push Notification Test</h1>
