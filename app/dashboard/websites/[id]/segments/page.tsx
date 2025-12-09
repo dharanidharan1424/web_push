@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import CopyButton from '@/components/copy-button'
 
 interface Segment {
     id: string
@@ -79,6 +80,9 @@ export default function WebsiteSegmentsPage() {
         }
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const scriptTag = `<script src="${appUrl}/push-client.js" data-website-id="${websiteId}" data-api-url="${appUrl}"></script>`
+
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
@@ -92,6 +96,22 @@ export default function WebsiteSegmentsPage() {
                 >
                     {showCreate ? 'Cancel' : 'Create Segment'}
                 </button>
+            </div>
+
+            {/* Integration Script Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-3">Installation Script</h2>
+                <p className="text-gray-600 mb-4 text-sm">
+                    Copy and paste this script tag into the <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 border border-gray-200">&lt;head&gt;</code> section of your website to enable web push notifications:
+                </p>
+                <div className="bg-gray-900 rounded-lg p-4 relative group">
+                    <code className="text-gray-100 text-sm break-all font-mono block pr-12">
+                        {scriptTag}
+                    </code>
+                    <div className="absolute top-4 right-4">
+                        <CopyButton text={scriptTag} />
+                    </div>
+                </div>
             </div>
 
             {showCreate && (

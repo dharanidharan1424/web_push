@@ -36,7 +36,7 @@ export default function IntegrationPage() {
         )
     }
 
-    const scriptTag = `<script src="${process.env.NEXT_PUBLIC_APP_URL || 'https://webpush.com'}/sw.js" data-website-id="${websiteId}"></script>`
+    const scriptTag = `<script src="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/push-client.js" data-website-id="${websiteId}" data-api-url="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}"></script>`
 
     return (
         <div className="max-w-3xl space-y-8">
