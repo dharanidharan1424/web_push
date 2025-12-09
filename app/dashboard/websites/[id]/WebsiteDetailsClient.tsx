@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import CopyButton from '@/components/copy-button'
 
@@ -37,6 +37,24 @@ export default function WebsiteDetailsClient({ website, appUrl }: WebsiteDetails
     })
     const [saving, setSaving] = useState(false)
     const [saveSuccess, setSaveSuccess] = useState(false)
+    // Unsubscribe metrics state
+    const [unsubscribeMetrics, setUnsubscribeMetrics] = useState({ totalSubscribers: 0, totalUnsubscribed: 0, unsubscribeRate: 0 })
+    // Fetch metrics on mount / website change
+    useEffect(() => {
+        if (!website?.id) return
+        const fetchMetrics = async () => {
+            try {
+                const res = await fetch(`/api/metrics/unsubscribe?websiteId=${website.id}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    setUnsubscribeMetrics(data)
+                }
+            } catch (e) {
+                console.error('Failed to load unsubscribe metrics', e)
+            }
+        }
+        fetchMetrics()
+    }, [website?.id])
 
     const handleSavePromptSettings = async () => {
         setSaving(true)
@@ -186,6 +204,23 @@ export default function WebsiteDetailsClient({ website, appUrl }: WebsiteDetails
                         )}
                     </div>
 
+                    {/* Unsubscribe Metrics */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+                        <div className="px-6 py-4 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-gray-900">Unsubscribe Metrics</h2>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm text-gray-600 mb-2">
+                                Total Subscribers: <strong>{unsubscribeMetrics.totalSubscribers}</strong>
+                            </p>
+                            <p className="text-sm text-gray-600 mb-2">
+                                Unsubscribed: <strong>{unsubscribeMetrics.totalUnsubscribed}</strong>
+                            </p>
+                            <p className="text-sm text-gray-600">
+                                Unsubscribe Rate: <strong>{unsubscribeMetrics.unsubscribeRate}%</strong>
+                            </p>
+                        </div>
+                    </div>
                     {/* Recent Notifications */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100">
