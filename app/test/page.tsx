@@ -8,7 +8,6 @@ export default function TestPage() {
             (window as any).webPushSubscribe();
         }
     }
-
     const handleJoinSegment = async () => {
         // Hardcoded segment ID for testing
         const segmentId = 'cmivqztz3000w115stz4fvyto';
@@ -33,9 +32,9 @@ export default function TestPage() {
     return (
         <>
             <Script
-                src="http://localhost:3000/push-client.js"
-                data-website-id="cmiy1wsy60001p9yeeq2aq4yl"
-                data-api-url="http://localhost:3000"
+                src="https://web-push-eight-hazel.vercel.app/push-client.js"
+                data-website-id="cmiy5s27k0001je6smki3adq7"
+                data-api-url="https://web-push-eight-hazel.vercel.app"
                 strategy="afterInteractive"
             />
 
