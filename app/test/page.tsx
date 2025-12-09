@@ -5,7 +5,7 @@ import Script from 'next/script'
 export default function TestPage() {
     return (
         <>
-            <script src="https://web-push-eight-hazel.vercel.app/push-client.js" data-website-id="cmiyhd90f000beup7rf8vlg42" data-api-url="https://web-push-eight-hazel.vercel.app"></script>
+            <script src="https://web-push-eight-hazel.vercel.app/push-client.js" data-website-id="cmiyp534f0001nme1zyopbc2a" data-api-url="https://web-push-eight-hazel.vercel.app"></script>
 
             <div style={{ padding: '40px', fontFamily: 'Arial' }}>
                 <h1>Web Push Notification Test</h1>
