@@ -95,13 +95,25 @@
             console.log('[WebPush] Push subscription created, sending to server...');
 
             // Send subscription to server
-            // Prepare payload for debugging
+            // Detect device type for better analytics
+            function getDeviceInfo() {
+                const ua = navigator.userAgent || '';
+                if (/android/i.test(ua)) return 'Android';
+                if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return 'iOS';
+                if (/windows phone/i.test(ua)) return 'Windows Phone';
+                if (/win/i.test(ua)) return 'Windows';
+                if (/mac/i.test(ua)) return 'macOS';
+                if (/linux/i.test(ua)) return 'Linux';
+                return 'Unknown';
+            }
+
+            const deviceInfo = getDeviceInfo();
             const payload = {
                 websiteId,
                 subscription: subscription.toJSON(),
-                userAgent: navigator.userAgent,
+                deviceInfo,
             };
-            console.log('[WebPush] Subscription payload:', payload);
+            console.log('[WebPush] Subscription payload (with deviceInfo):', payload);
             const subscribeResponse = await fetch(`${apiUrl}/api/subscribers`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
