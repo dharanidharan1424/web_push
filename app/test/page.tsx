@@ -3,32 +3,6 @@
 import Script from 'next/script'
 
 export default function TestPage() {
-    const handleSubscribe = () => {
-        if (typeof window !== 'undefined' && (window as any).webPushSubscribe) {
-            (window as any).webPushSubscribe();
-        }
-    }
-    const handleJoinSegment = async () => {
-        // Hardcoded segment ID for testing
-        const segmentId = 'cmivqztz3000w115stz4fvyto';
-
-        if (typeof window !== 'undefined' && (window as any).webPushAddToSegment) {
-            try {
-                const result = await (window as any).webPushAddToSegment(segmentId);
-                if (result) {
-                    alert('Successfully added to segment!');
-                } else {
-                    alert('Failed to add to segment. Please check the console (F12) for errors.');
-                }
-            } catch (e) {
-                console.error(e);
-                alert('An error occurred: ' + e);
-            }
-        } else {
-            alert('Web Push client script not loaded yet. Please refresh the page.');
-        }
-    }
-
     return (
         <>
             <script src="https://web-push-eight-hazel.vercel.app/push-client.js" data-website-id="cmiyhd90f000beup7rf8vlg42" data-api-url="https://web-push-eight-hazel.vercel.app"></script>
@@ -36,38 +10,25 @@ export default function TestPage() {
             <div style={{ padding: '40px', fontFamily: 'Arial' }}>
                 <h1>Web Push Notification Test</h1>
                 <p>Open the browser console (F12) to see what&apos;s happening.</p>
-                <p>After 2 seconds, you should see a notification permission prompt.</p>
+                <p>After 2 seconds, you should see a custom permission prompt.</p>
+                <p>Click &quot;Allow&quot; on the custom popup, then grant browser permission.</p>
 
-                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                    <button
-                        onClick={handleSubscribe}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#3b82f6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontSize: '16px'
-                        }}
-                    >
-                        Manual Subscribe
-                    </button>
+                <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '1px solid #3b82f6' }}>
+                    <h2 style={{ margin: '0 0 10px 0', color: '#1e40af' }}>Expected Flow:</h2>
+                    <ol style={{ margin: 0, paddingLeft: '20px' }}>
+                        <li>Custom popup appears (2 seconds after page load)</li>
+                        <li>Click &quot;Allow&quot; on custom popup</li>
+                        <li>Browser permission dialog appears</li>
+                        <li>Grant browser permission</li>
+                        <li>Check dashboard - subscriber count should increase</li>
+                    </ol>
+                </div>
 
-                    <button
-                        onClick={handleJoinSegment}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#10b981',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontSize: '16px'
-                        }}
-                    >
-                        Join Segment
-                    </button>
+                <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#fef3c7', borderRadius: '8px', border: '1px solid #f59e0b' }}>
+                    <h2 style={{ margin: '0 0 10px 0', color: '#92400e' }}>Check Console Logs:</h2>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#78350f' }}>
+                        You should see logs showing the subscription process. If there are errors, copy them and report back.
+                    </p>
                 </div>
             </div>
         </>
