@@ -43,14 +43,7 @@
         try {
             console.log('[WebPush] Starting subscription process...');
 
-            // Check if already subscribed to prevent duplicates
-            const alreadySubscribed = await isSubscribed();
-            if (alreadySubscribed) {
-                console.log('[WebPush] Already subscribed, skipping');
-                return true;
-            }
-
-            // Request permission
+            // Request permission FIRST
             const permission = await Notification.requestPermission();
 
             if (permission !== 'granted') {
@@ -58,20 +51,48 @@
                 return false;
             }
 
+            console.log('[WebPush] Permission granted, checking for existing subscription...');
+
             // Use existing service worker registration (DO NOT register again)
             console.log('[WebPush] Waiting for existing SW registration...');
             const registration = await navigator.serviceWorker.ready;
             console.log('[WebPush] Using existing SW registration');
 
+            // Check if already subscribed AFTER permission is granted
+            const existingSubscription = await registration.pushManager.getSubscription();
+            if (existingSubscription) {
+                console.log('[WebPush] Already have an active subscription, verifying with server...');
+
+                // Verify subscription is registered on server
+                const verifyResponse = await fetch(`${apiUrl}/api/subscribers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        websiteId,
+                        subscription: existingSubscription.toJSON(),
+                        userAgent: navigator.userAgent,
+                    }),
+                });
+
+                if (verifyResponse.ok) {
+                    console.log('[WebPush] Subscription verified with server');
+                    return true;
+                }
+            }
+
             // Get VAPID public key
+            console.log('[WebPush] Fetching VAPID key...');
             const response = await fetch(`${apiUrl}/api/vapid-key`);
             const { publicKey } = await response.json();
 
             // Subscribe to push notifications
+            console.log('[WebPush] Creating new push subscription...');
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(publicKey),
             });
+
+            console.log('[WebPush] Push subscription created, sending to server...');
 
             // Send subscription to server
             const subscribeResponse = await fetch(`${apiUrl}/api/subscribers`, {
@@ -88,7 +109,8 @@
                 console.log('[WebPush] Successfully subscribed to push notifications');
                 return true;
             } else {
-                console.error('[WebPush] Failed to register subscription with server');
+                const errorData = await subscribeResponse.json();
+                console.error('[WebPush] Failed to register subscription with server:', errorData);
                 return false;
             }
         } catch (error) {

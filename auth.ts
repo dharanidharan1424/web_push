@@ -56,5 +56,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             return session
         },
+        async redirect({ url, baseUrl }) {
+            // Use NEXT_PUBLIC_APP_URL if available, otherwise use baseUrl
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || baseUrl
+
+            // If url is relative, prepend the app URL
+            if (url.startsWith('/')) {
+                return `${appUrl}${url}`
+            }
+            // If url is on the same origin, allow it
+            else if (new URL(url).origin === appUrl) {
+                return url
+            }
+            // Otherwise redirect to app URL
+            return appUrl
+        },
     },
 })
