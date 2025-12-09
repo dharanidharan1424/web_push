@@ -108,8 +108,8 @@ export default function WebsitesPage() {
                 </div>
                 <button
                     onClick={() => {
-                        // Check if at limit
-                        if (websiteLimit !== Infinity && websites.length >= websiteLimit) {
+                        // Check if at limit (-1 means unlimited)
+                        if (websiteLimit !== -1 && websites.length >= websiteLimit) {
                             setShowUpgradeModal(true)
                         } else {
                             setShowAddForm(!showAddForm)
@@ -191,7 +191,7 @@ export default function WebsitesPage() {
                                 </svg>
                             </div>
                             <p className="text-center text-gray-700 mb-2">
-                                You've reached your <span className="font-bold">{userPlan}</span> plan limit of <span className="font-bold">{websiteLimit}</span> {websiteLimit === 1 ? 'website' : 'websites'}.
+                                You've reached your <span className="font-bold">{userPlan}</span> plan limit of <span className="font-bold">{websiteLimit === -1 ? 'Unlimited' : websiteLimit}</span> {websiteLimit === 1 ? 'website' : 'websites'}.
                             </p>
                             <p className="text-center text-gray-500 text-sm">
                                 Upgrade your plan to create more websites and unlock additional features.

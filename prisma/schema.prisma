@@ -39,6 +39,14 @@ model Website {
   notifications Notification[]
   segments      Segment[]
 
+  // Permission prompt settings
+  promptEnabled     Boolean  @default(true)
+  promptTitle       String   @default("Stay Updated!")
+  promptMessage     String   @default("Get notifications about our latest updates and offers")
+  promptAllowText   String   @default("Allow")
+  promptDenyText    String   @default("Maybe Later")
+  promptPosition    String   @default("center") // center, bottom-left, bottom-right
+
   @@index([userId])
 }
 

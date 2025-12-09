@@ -20,13 +20,16 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
+        // Convert Infinity to -1 for JSON serialization (Infinity cannot be serialized)
+        const convertLimit = (limit: number) => limit === Infinity ? -1 : limit
+
         return NextResponse.json({
             plan: user.plan,
             limits: {
-                websites: getPlanLimit(user.plan, 'websites'),
-                subscribers: getPlanLimit(user.plan, 'subscribers'),
-                segments: getPlanLimit(user.plan, 'segments'),
-                campaigns: getPlanLimit(user.plan, 'campaigns'),
+                websites: convertLimit(getPlanLimit(user.plan, 'websites')),
+                subscribers: convertLimit(getPlanLimit(user.plan, 'subscribers')),
+                segments: convertLimit(getPlanLimit(user.plan, 'segments')),
+                campaigns: convertLimit(getPlanLimit(user.plan, 'campaigns')),
             }
         })
     } catch (error) {
