@@ -95,15 +95,24 @@
             console.log('[WebPush] Push subscription created, sending to server...');
 
             // Send subscription to server
+            // Prepare payload for debugging
+            const payload = {
+                websiteId,
+                subscription: subscription.toJSON(),
+                userAgent: navigator.userAgent,
+            };
+            console.log('[WebPush] Subscription payload:', payload);
             const subscribeResponse = await fetch(`${apiUrl}/api/subscribers`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    websiteId,
-                    subscription: subscription.toJSON(),
-                    userAgent: navigator.userAgent,
-                }),
+                body: JSON.stringify(payload),
             });
+            // Log response for debugging
+            console.log('[WebPush] Subscription POST response status:', subscribeResponse.status);
+            if (!subscribeResponse.ok) {
+                const errorData = await subscribeResponse.json().catch(() => ({}));
+                console.error('[WebPush] Subscription POST error payload:', errorData);
+            }
 
             if (subscribeResponse.ok) {
                 console.log('[WebPush] Successfully subscribed to push notifications');
