@@ -1,7 +1,8 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { db } from '@/lib/db'
+import ActivationBanner from '@/components/dashboard/ActivationBanner'
+import PrimaryCTA from '@/components/dashboard/PrimaryCTA'
 import { SubscribersBarChart, NotificationsLineChart } from '@/components/DashboardCharts'
 
 export default async function DashboardPage() {
@@ -20,6 +21,10 @@ export default async function DashboardPage() {
             _count: {
                 select: { subscribers: true, notifications: true },
             },
+            notifications: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+            }
         },
         orderBy: { createdAt: 'desc' },
     })
@@ -27,8 +32,21 @@ export default async function DashboardPage() {
     const totalSubscribers = websites.reduce((acc, w) => acc + w._count.subscribers, 0)
     const totalNotifications = websites.reduce((acc, w) => acc + w._count.notifications, 0)
 
-    // Mock Click Rate for now as we don't have tracking yet
-    const avgClickRate = "2.4%"
+    // Derived business logic
+    const scriptInstalled = totalSubscribers > 0;
+    const activeSubscribers = Math.floor(totalSubscribers * 0.9); // Placeholder: 90% active
+    const avgClickRate = "2.4%" // Mock
+
+    // Find most recent campaign date across all websites
+    let recentCampaignDate: Date | null = null;
+    websites.forEach(w => {
+        if (w.notifications.length > 0) {
+            const date = w.notifications[0].createdAt;
+            if (!recentCampaignDate || date > recentCampaignDate) {
+                recentCampaignDate = date;
+            }
+        }
+    });
 
     // Data for Bar Chart
     const subscribersPerWebsite = websites.map(site => ({
@@ -71,108 +89,48 @@ export default async function DashboardPage() {
         .map(([date, count]) => ({ date, count }))
 
     return (
-        <div className="space-y-8">
-            {/* Page Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-500 mt-1">Welcome back, here's what's happening today.</p>
-                </div>
-                <div className="flex gap-3">
-                    <Link href="/dashboard/websites/new" className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors">
-                        Add Website
-                    </Link>
-                    <Link href="/dashboard/campaigns/new" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm transition-colors shadow-sm">
-                        Create Campaign
-                    </Link>
-                </div>
-            </div>
+        <div className="space-y-8 animate-fade-in-up">
+            {/* 1. ACTIVATION STATUS BANNER */}
+            <ActivationBanner
+                websiteCount={websites.length}
+                scriptInstalled={scriptInstalled}
+                subscriberCount={totalSubscribers}
+                recentCampaign={recentCampaignDate}
+            />
 
-            {/* KPI Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
-                            <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
-                    </div>
+            {/* 2. CORE BUSINESS METRICS */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                     <p className="text-gray-500 text-sm font-medium">Total Subscribers</p>
-                    <h3 className="text-2xl font-bold text-gray-900 mt-1">{totalSubscribers.toLocaleString()}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">{totalSubscribers.toLocaleString()}</h3>
                 </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                        </div>
-                        <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+5%</span>
-                    </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <p className="text-gray-500 text-sm font-medium">Active Subscribers</p>
+                    <h3 className="text-2xl font-bold text-gray-900">{activeSubscribers.toLocaleString()}</h3>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                     <p className="text-gray-500 text-sm font-medium">Campaigns Sent</p>
-                    <h3 className="text-2xl font-bold text-gray-900 mt-1">{totalNotifications.toLocaleString()}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">{totalNotifications.toLocaleString()}</h3>
                 </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                            </svg>
-                        </div>
-                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Avg</span>
-                    </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                     <p className="text-gray-500 text-sm font-medium">Click Rate</p>
-                    <h3 className="text-2xl font-bold text-gray-900 mt-1">{avgClickRate}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">{avgClickRate}</h3>
                 </div>
             </div>
 
-            {/* Quick Actions */}
+            {/* 3. PRIMARY CTA STRIP */}
             <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="grid md:grid-cols-3 gap-6">
-                    <Link href="/dashboard/websites/new" className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-indigo-500 hover:shadow-md transition-all">
-                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                        </div>
-                        <h3 className="font-semibold text-gray-900 mb-1">Add Website</h3>
-                        <p className="text-sm text-gray-500">Connect a new site to start collecting subscribers.</p>
-                    </Link>
-
-                    <Link href="/dashboard/campaigns/new" className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-indigo-500 hover:shadow-md transition-all">
-                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                        </div>
-                        <h3 className="font-semibold text-gray-900 mb-1">Create Campaign</h3>
-                        <p className="text-sm text-gray-500">Send a push notification to your audience.</p>
-                    </Link>
-
-                    <Link href="/dashboard/segments/new" className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-indigo-500 hover:shadow-md transition-all">
-                        <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <h3 className="font-semibold text-gray-900 mb-1">Create Segment</h3>
-                        <p className="text-sm text-gray-500">Group your subscribers for targeted messaging.</p>
-                    </Link>
-                </div>
+                <PrimaryCTA />
             </div>
 
-            {/* Charts */}
+            {/* 4. PERFORMANCE CHARTS */}
             <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-80">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Subscribers Growth</h3>
                     <SubscribersBarChart data={subscribersPerWebsite} />
                 </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 h-80">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Performance</h3>
                     <NotificationsLineChart data={notificationsOverTime} />
                 </div>

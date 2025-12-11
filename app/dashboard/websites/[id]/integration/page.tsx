@@ -1,76 +1,48 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import { db } from '@/lib/db'
 import CopyButton from '@/components/copy-button'
+import Link from 'next/link'
 
-export default function IntegrationPage() {
-    const params = useParams()
-    const websiteId = params.id as string
-    const [loading, setLoading] = useState(true)
-    const [website, setWebsite] = useState<any>(null)
+export default async function IntegrationPage({ params }: { params: Promise<{ id: string }> }) {
+    const session = await auth()
+    if (!session?.user?.id) redirect('/login')
 
-    useEffect(() => {
-        if (websiteId) {
-            fetchWebsite()
-        }
-    }, [websiteId])
+    const { id } = await params
 
-    const fetchWebsite = async () => {
-        try {
-            const res = await fetch(`/api/websites/${websiteId}`)
-            const data = await res.json()
-            setWebsite(data.website)
-        } catch (err) {
-            console.error('Error fetching website:', err)
-        } finally {
-            setLoading(false)
-        }
-    }
+    // Validate access
+    const website = await db.website.findFirst({
+        where: { id, userId: session.user.id },
+        select: { id: true, name: true }
+    })
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
-            </div>
-        )
-    }
+    if (!website) redirect('/dashboard/websites')
 
-    const scriptTag = `<script src="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/push-client.js" data-website-id="${websiteId}" data-api-url="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}"></script>`
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
     return (
-        <div className="max-w-3xl space-y-8">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-900">Integration</h2>
-                <p className="text-gray-500 mt-1">Install the push notification script on your website.</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">1. Add the Script</h3>
+        <div className="space-y-6 animate-fade-in max-w-4xl">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Installation Script</h2>
                 <p className="text-gray-600 mb-4">
-                    Copy and paste the following code snippet into the <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">&lt;head&gt;</code> tag of your website.
+                    Copy and paste this script tag into the <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 border border-gray-200">&lt;head&gt;</code> section of your website:
                 </p>
-                <div className="bg-gray-900 rounded-lg p-4 relative group">
-                    <code className="text-gray-100 text-sm break-all font-mono block pr-12">
-                        {scriptTag}
+                <div className="bg-gray-50 rounded-lg p-4 overflow-x-auto border border-gray-200 mb-4">
+                    <code className="text-sm text-gray-800 font-mono whitespace-nowrap">
+                        {`<script src="${appUrl}/push-client.js" data-website-id="${website.id}" data-api-url="${appUrl}"></script>`}
                     </code>
-                    <div className="absolute top-4 right-4">
-                        <CopyButton text={scriptTag} />
-                    </div>
                 </div>
+                <CopyButton text={`<script src="${appUrl}/push-client.js" data-website-id="${website.id}" data-api-url="${appUrl}"></script>`} />
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">2. Verify Installation</h3>
-                <p className="text-gray-600 mb-4">
-                    After adding the script, visit your website and check if the browser asks for notification permission.
+            <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">Need Help?</h3>
+                <p className="text-blue-700 text-sm mb-4">
+                    Check out our documentation for detailed instructions on how to integrate WebPush with your specific platform (WordPress, Shopify, Custom, etc.).
                 </p>
-                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-4 py-3 rounded-lg border border-green-100">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Status: {website?.verified ? 'Verified' : 'Pending Verification'}
-                </div>
+                <Link href="/help" className="text-sm font-medium text-blue-600 hover:text-blue-800 underline">
+                    View Documentation &rarr;
+                </Link>
             </div>
         </div>
     )

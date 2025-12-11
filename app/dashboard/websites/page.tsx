@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import WebsiteCard from '@/components/dashboard/WebsiteCard'
+import BulkActionToolbar from '@/components/dashboard/BulkActionToolbar'
 
 interface Website {
     id: string
@@ -27,6 +29,9 @@ export default function WebsitesPage() {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const [userPlan, setUserPlan] = useState('FREE')
     const [websiteLimit, setWebsiteLimit] = useState(1)
+
+    // Bulk Selection State
+    const [selectedIds, setSelectedIds] = useState<string[]>([])
 
     useEffect(() => {
         fetchWebsites()
@@ -88,19 +93,32 @@ export default function WebsitesPage() {
         }
     }
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this website?')) return
-
-        try {
-            await fetch(`/api/websites/${id}`, { method: 'DELETE' })
-            fetchWebsites()
-        } catch (err) {
-            console.error('Error deleting website:', err)
+    const toggleSelection = (id: string) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(itemId => itemId !== id))
+        } else {
+            setSelectedIds([...selectedIds, id])
         }
     }
 
+    const toggleSelectAll = () => {
+        if (selectedIds.length === websites.length) {
+            setSelectedIds([])
+        } else {
+            setSelectedIds(websites.map(w => w.id))
+        }
+    }
+
+    const handleBulkSend = () => {
+        alert('Bulk send not implemented yet (Agency Feature)')
+    }
+
+    const handleBulkExport = () => {
+        alert('Exporting data for: ' + selectedIds.join(', '))
+    }
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Sites & Apps</h1>
@@ -121,9 +139,16 @@ export default function WebsitesPage() {
                 </button>
             </div>
 
+            {/* Bulk Actions */}
+            <BulkActionToolbar
+                selectedIds={selectedIds}
+                onSendCampaign={handleBulkSend}
+                onExport={handleBulkExport}
+            />
+
             {/* Add Website Form */}
             {showAddForm && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-fade-in">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-fade-in mb-6">
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Add New Website</h2>
                     <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
                         {error && (
@@ -168,109 +193,52 @@ export default function WebsitesPage() {
                 </div>
             )}
 
-            {/* Upgrade Modal */}
-            {showUpgradeModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-fade-in">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-gray-900">Upgrade Required</h2>
-                            <button
-                                onClick={() => setShowUpgradeModal(false)}
-                                className="text-gray-400 hover:text-gray-600"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="mb-6">
-                            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <p className="text-center text-gray-700 mb-2">
-                                You've reached your <span className="font-bold">{userPlan}</span> plan limit of <span className="font-bold">{websiteLimit === -1 ? 'Unlimited' : websiteLimit}</span> {websiteLimit === 1 ? 'website' : 'websites'}.
-                            </p>
-                            <p className="text-center text-gray-500 text-sm">
-                                Upgrade your plan to create more websites and unlock additional features.
-                            </p>
-                        </div>
-
-                        <div className="space-y-3">
-                            <Link
-                                href="/dashboard/settings"
-                                className="block w-full py-3 px-4 bg-indigo-600 text-white text-center rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-                                onClick={() => setShowUpgradeModal(false)}
-                            >
-                                View Upgrade Options
-                            </Link>
-                            <button
-                                onClick={() => setShowUpgradeModal(false)}
-                                className="w-full py-3 px-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                            >
-                                Maybe Later
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Websites List */}
+            {/* Websites Grid */}
             {loading ? (
                 <div className="text-center py-12">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
                 </div>
             ) : websites.length > 0 ? (
-                <div className="grid gap-4">
-                    {websites.map((website) => (
-                        <div key={website.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-indigo-200 transition-all group">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl">
-                                        {website.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                            <Link href={`/dashboard/websites/${website.id}`}>{website.name}</Link>
-                                        </h3>
-                                        <a href={website.url} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:underline">
-                                            {website.url}
-                                        </a>
-                                    </div>
+                <div>
+                    {/* Select All Checkbox (Optional UI enhancement) */}
+                    {websites.length > 1 && (
+                        <div className="flex items-center mb-4 ml-1">
+                            <input
+                                type="checkbox"
+                                checked={selectedIds.length === websites.length}
+                                onChange={toggleSelectAll}
+                                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                            />
+                            <span className="ml-2 text-sm text-gray-600">Select All</span>
+                        </div>
+                    )}
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {websites.map((website) => (
+                            <div key={website.id} className="relative flex">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.includes(website.id)}
+                                        onChange={() => toggleSelection(website.id)}
+                                        className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 shadow-sm"
+                                    />
                                 </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Subscribers</p>
-                                        <p className="text-lg font-bold text-gray-900">{website._count.subscribers}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Notifications</p>
-                                        <p className="text-lg font-bold text-gray-900">{website._count.notifications}</p>
-                                    </div>
-                                    <div className="h-8 w-px bg-gray-200 mx-2"></div>
-                                    <div className="flex gap-2">
-                                        <Link
-                                            href={`/dashboard/websites/${website.id}`}
-                                            className="px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors font-medium text-sm"
-                                        >
-                                            Manage
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(website.id)}
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Delete Website"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
+                                <div className="w-full">
+                                    <WebsiteCard
+                                        id={website.id}
+                                        name={website.name}
+                                        url={website.url}
+                                        verified={website._count.subscribers > 0} // Placeholder verification logic
+                                        scriptInstalled={website._count.subscribers > 0} // Placeholder
+                                        subscriberCount={website._count.subscribers}
+                                        healthScore="Good" // Placeholder
+                                        lastCampaignAt={null} // Need to fetch if not available
+                                    />
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
