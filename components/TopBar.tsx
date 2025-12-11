@@ -17,7 +17,7 @@ export default function TopBar({ userName, userEmail }: TopBarProps) {
     useEffect(() => {
         const fetchPlan = async () => {
             try {
-                const res = await fetch('/api/user/plan/stats')
+                const res = await fetch('/api/user/plan/stats', { cache: 'no-store' })
                 if (res.ok) {
                     const data = await res.json()
                     setUserPlan(data.plan || 'FREE')

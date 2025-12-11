@@ -27,6 +27,15 @@ export async function POST(req: Request) {
                 data: { plan: plan as Plan },
             })
 
+            console.log(`[VERIFY] User ${session.user.id} upgraded to ${plan}`)
+
+            // Force cache revalidation to show new plan immediately
+            const { revalidatePath } = await import('next/cache')
+            revalidatePath('/dashboard')
+            revalidatePath('/dashboard/settings')
+            revalidatePath('/api/user/plan')
+            revalidatePath('/api/user/plan/stats')
+
             return NextResponse.json({ success: true })
         } else {
             return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })

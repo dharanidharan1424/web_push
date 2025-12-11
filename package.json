@@ -12,6 +12,8 @@
     "@hookform/resolvers": "^5.2.2",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.559.0",
     "next": "16.0.7",
     "next-auth": "^5.0.0-beta.30",
     "razorpay": "^2.9.6",
@@ -19,6 +21,7 @@
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.68.0",
+    "tailwind-merge": "^3.4.0",
     "web-push": "^3.6.7",
     "zod": "^4.1.13"
   },

@@ -1,0 +1,14 @@
+﻿app/api/metrics/unsubscribe/route.ts(13,55): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'SubscriberWhereInput'.
+app/api/metrics/unsubscribe/route.ts(14,55): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'SubscriberWhereInput'.
+app/dashboard/websites/[id]/page.tsx(41,34): error TS2322: Type '{ subscribers: { auth: string; id: string; createdAt: Date; updatedAt: Date; websiteId: string; endpoint: string; p256dh: string; userAgent: string | null; }[]; notifications: { id: string; ... 9 more ...; scheduledFor: Date | null; }[]; _count: { ...; }; } & { ...; }' is not assignable to type '{ id: string; name: string; url: string; createdAt: string; _count: { subscribers: number; notifications: number; }; subscribers: any[]; notifications: any[]; promptEnabled: boolean; }'.
+  Types of property 'createdAt' are incompatible.
+    Type 'Date' is not assignable to type 'string'.
+components/dashboard/WebsiteCard.tsx(3,10): error TS2614: Module '"@/components/ui/Card"' has no exported member 'Card'. Did you mean to use 'import Card from "@/components/ui/Card"' instead?
+components/dashboard/WebsiteCard.tsx(4,34): error TS2307: Cannot find module '@/lib/utils' or its corresponding type declarations.
+components/dashboard/WebsiteCard.tsx(5,25): error TS2307: Cannot find module '@/components/ui/Tooltip' or its corresponding type declarations.
+components/dashboard/WebsiteHealthBar.tsx(2,25): error TS2307: Cannot find module '@/components/ui/Tooltip' or its corresponding type declarations.
+components/ui/FeatureLock.tsx(2,25): error TS2307: Cannot find module '@/components/ui/Tooltip' or its corresponding type declarations.
+components/ui/FeatureLock.tsx(7,27): error TS2304: Cannot find name 'planFeatures'.
+components/ui/FeatureLock.tsx(13,46): error TS2345: Argument of type 'string | number | symbol' is not assignable to parameter of type '"canCreateSegments" | "canScheduleCampaigns" | "canViewDeviceBreakdown" | "canExportCSV" | "canAccessTeamTab" | "maxWebsites" | "maxSubscribers"'.
+  Type 'string' is not assignable to type '"canCreateSegments" | "canScheduleCampaigns" | "canViewDeviceBreakdown" | "canExportCSV" | "canAccessTeamTab" | "maxWebsites" | "maxSubscribers"'.
+components/ui/FeatureLock.tsx(17,57): error TS2731: Implicit conversion of a 'symbol' to a 'string' will fail at runtime. Consider wrapping this expression in 'String(...)'.

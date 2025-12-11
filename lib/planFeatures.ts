@@ -1,5 +1,5 @@
 export const planFeatures = {
-    STARTER: {
+    FREE: {
         canCreateSegments: false,
         canScheduleCampaigns: false,
         canViewDeviceBreakdown: false,
@@ -8,7 +8,7 @@ export const planFeatures = {
         maxWebsites: 1,
         maxSubscribers: 2000,
     },
-    GROWTH: {
+    PRO: {
         canCreateSegments: true,
         canScheduleCampaigns: true,
         canViewDeviceBreakdown: true,

@@ -23,6 +23,22 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url)
         const websiteId = searchParams.get('websiteId')
+        const id = searchParams.get('id')
+
+        if (id) {
+            const notification = await db.notification.findUnique({
+                where: {
+                    id,
+                    website: { userId: session.user.id }
+                }
+            })
+
+            if (!notification) {
+                return NextResponse.json({ error: 'Notification not found' }, { status: 404 })
+            }
+
+            return NextResponse.json({ notification })
+        }
 
         const where = websiteId
             ? {

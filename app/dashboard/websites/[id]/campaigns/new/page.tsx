@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 interface Segment {
@@ -29,12 +29,45 @@ function CampaignForm() {
     const [scheduledFor, setScheduledFor] = useState('')
     const [websiteName, setWebsiteName] = useState('')
 
+    const searchParams = useSearchParams()
+    const resendId = searchParams.get('resend')
+
     useEffect(() => {
         if (websiteId) {
             fetchSegments(websiteId)
             fetchWebsiteDetails(websiteId)
         }
     }, [websiteId])
+
+    useEffect(() => {
+        if (websiteId && resendId) {
+            fetchOriginalCampaign(websiteId, resendId)
+        }
+    }, [websiteId, resendId])
+
+    const fetchOriginalCampaign = async (wId: string, cId: string) => {
+        try {
+            const res = await fetch(`/api/notifications?id=${cId}&websiteId=${wId}`)
+            if (res.ok) {
+                const data = await res.json()
+                if (data.notification) {
+                    const n = data.notification
+                    setTitle(n.title)
+                    setBody(n.body)
+                    setUrl(n.url || '')
+                    setIcon(n.icon || '')
+                    // setScheduledFor('') // Don't copy scheduled time, user should set new
+                    // setSelectedSegments match logic is tricky if segments are not loaded yet or deleted.
+                    // n.segmentIds is array of strings
+                    if (n.segmentIds && Array.isArray(n.segmentIds)) {
+                        setSelectedSegments(n.segmentIds)
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching original campaign:', err)
+        }
+    }
 
     const fetchWebsiteDetails = async (wId: string) => {
         try {

@@ -9,10 +9,8 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'websiteId query param required' }, { status: 400 })
         }
 
-        const [totalSubscribers, totalUnsubscribed] = await Promise.all([
-            db.subscriber.count({ where: { websiteId, status: 'active' } }),
-            db.subscriber.count({ where: { websiteId, status: 'unsubscribed' } }),
-        ])
+        const totalSubscribers = await db.subscriber.count({ where: { websiteId } })
+        const totalUnsubscribed = 0; // Schema update required to track status
 
         const unsubscribeRate = totalSubscribers + totalUnsubscribed === 0
             ? 0

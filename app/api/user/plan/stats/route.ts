@@ -3,6 +3,8 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { getPlanLimit } from '@/lib/plan-helpers'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     try {
         const session = await auth()
@@ -11,14 +13,20 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        // Debug logging
+        console.log(`[PLAN_STATS] Fetching stats for user: ${session.user.id}`)
+
         const user = await db.user.findUnique({
             where: { id: session.user.id },
             select: { plan: true }
         })
 
         if (!user) {
+            console.error(`[PLAN_STATS] User not found in DB: ${session.user.id}`)
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
+
+        console.log(`[PLAN_STATS] User found, plan: ${user.plan}`)
 
         // Get actual counts
         const websiteCount = await db.website.count({

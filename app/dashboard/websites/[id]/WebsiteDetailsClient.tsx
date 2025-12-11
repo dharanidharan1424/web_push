@@ -14,7 +14,7 @@ interface WebsiteDetailsClientProps {
         id: string
         name: string
         url: string
-        createdAt: string
+        createdAt: Date
         _count: {
             subscribers: number
             notifications: number

@@ -3,6 +3,8 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { getPlanLimit } from '@/lib/plan-helpers'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     try {
         const session = await auth()

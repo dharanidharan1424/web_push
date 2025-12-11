@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/Card';
+import Card from '@/components/ui/Card';
 import { getDomainFromUrl } from '@/lib/utils'; // assume utility exists
 import { Tooltip } from '@/components/ui/Tooltip'; // placeholder
 

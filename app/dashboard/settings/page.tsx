@@ -200,7 +200,7 @@ function BillingSection() {
 
     const fetchPlanInfo = async () => {
         try {
-            const res = await fetch('/api/user/plan')
+            const res = await fetch('/api/user/plan', { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
                 setUserPlan(data.plan || 'FREE')
